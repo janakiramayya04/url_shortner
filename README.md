@@ -1,0 +1,24 @@
+# URL Shortener
+
+A **FastAPI**-based URL shortener with Docker support.  
+It allows users to shorten URLs with custom keywords, track the number of clicks, and record the timestamp of each click.
+
+## Features
+- Shorten any URL
+- Option to use a **custom keyword**
+- Track **number of clicks** for each link
+- Record **timestamps** of clicks
+- Fully containerized using **Docker**
+
+## Tech Stack
+- **FastAPI** (Backend API)
+- **SQLite/MySQL** (Configurable database)
+- **SQLAlchemy** (ORM)
+- **Docker** (Containerization)
+
+## Installation
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/janakiramayya04/url_shortner.git
+cd url_shortner
