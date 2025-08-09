@@ -53,6 +53,11 @@ Body
 GET /status/{keyword}
 ```
 # Returns:
+--Click count
+--Last clicked timestamp
+
+## License
+# This project is licensed under the MIT License.
 
 
 
