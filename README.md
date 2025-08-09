@@ -36,4 +36,24 @@ docker run -p 8000:8000 url_shortener
 ```arduino
 http://127.0.0.1:8000/docs
 ```
+## API Endpoints
+## Create a shortened URL
+``` bash
+POST /shorten
+```
+Body
+``` json
+{
+  "url": "https://example.com",
+  "custom_keyword": "mykeyword"
+}
+```
+## Get click status
+``` bash
+GET /status/{keyword}
+```
+# Returns:
+
+
+
 
