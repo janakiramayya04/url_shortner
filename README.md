@@ -22,3 +22,17 @@ It allows users to shorten URLs with custom keywords, track the number of clicks
 ```bash
 git clone https://github.com/janakiramayya04/url_shortner.git
 cd url_shortner
+```
+## 2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+## 3. Run using Docker
+```bash
+docker build -t url_shortener .
+docker run -p 8000:8000 url_shortener
+```
+## 4. Access the API
+```bash
+http://127.0.0.1:8000/docs
+```
