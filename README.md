@@ -33,6 +33,7 @@ docker build -t url_shortener .
 docker run -p 8000:8000 url_shortener
 ```
 ## 4. Access the API
-```bash
+```arduino
 http://127.0.0.1:8000/docs
 ```
+
