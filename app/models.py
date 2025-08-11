@@ -21,7 +21,7 @@ class Users(Base):
     email = Column(String(20), nullable=False)
     password = Column(String(100), nullable=False)
     status = Column(Boolean, server_default="0", nullable=False)
-    FirstLogin = Column(Boolean, server_default="0", nullable=False)
+    isverified = Column(Boolean, server_default="0", nullable=False)
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )

@@ -6,15 +6,25 @@ from . import database
 from . import models
 from . import crud
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-from fastapi.security.oauth2 import OAuth2PasswordRequestForm
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-models.Base.metadata.create_all(bind=database.engine)
+from .routers import user, auth
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="URL Shortener", description="A simple API to shorten URLs.", version="1.0.0"
 )
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+models.Base.metadata.create_all(bind=database.engine)
 templates = Jinja2Templates(directory="app/templates")
+app.include_router(auth.router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -83,61 +93,3 @@ def custom_key(
     )
     print(created_url_entry.url, created_url_entry.keyword)
     return {created_url_entry.keyword, created_url_entry.url}
-
-
-@app.post("/login/", status_code=status.HTTP_200_OK)
-async def login(
-    request: Request,
-    user_credentials: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(database.get_db),
-):
-    # Filter search for user
-    user = (
-        db.query(models.User)
-        .filter(models.User.email == user_credentials.username)
-        .first()
-    )
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Username or Password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    if user.is_verified != True:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Account Not Verified"
-        )
-    access_token = create_access_token(data={"user_id": user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
-@app.post(
-    "/register",
-    status_code=status.HTTP_201_CREATED,
-    response_model=schemas.RegistrationUserRepsonse,
-)
-def register(
-    request: Request,
-    user_credentials: schemas.UserCreate,
-    db: Session = Depends(database.get_db),
-):
-    email_check = (
-        db.query(models.Users)
-        .filter(models.Users.email == user_credentials.email)
-        .first()
-    )
-    if email_check != None:
-        raise HTTPException(
-            detail="Email is already registered", status_code=status.HTTP_409_CONFLICT
-        )
-    hashed_password = pwd_context.hash(user_credentials.password)
-    user_credentials.password = hashed_password
-    new_user = models.Users(
-        username=user_credentials.username,
-        email=user_credentials.email,
-        password=user_credentials.password,
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return {"message": "User registration successful", "data": new_user}

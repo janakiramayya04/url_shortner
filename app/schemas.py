@@ -15,8 +15,8 @@ class UserBase(BaseModel):
     email: EmailStr
     password: str
     username:str
-    status: Optional[bool] = False
-    FirstLogin:Optional[bool] = False
+    status: Optional[bool] = True
+    isverified:Optional[bool] = False
 
 
 class UserCreate(UserBase):
@@ -39,3 +39,12 @@ class UserResponse(BaseModel):
 class RegistrationUserRepsonse(BaseModel):
     message: str
     data: UserResponse
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
