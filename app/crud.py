@@ -38,7 +38,7 @@ def custom_keyword_create(keyword: str, db: Session, url: str):
     return db_url
 
 
-def get_status(keyword: str, db: Session):
+def get_status(keyword: str, db: Session,owner_id:int):
     k_p = db.query(URLST).filter(URLST.keyword == keyword).first()
     if not k_p:
         raise HTTPException(status_code=404, detail="Keyword not found")
@@ -49,8 +49,8 @@ def get_status(keyword: str, db: Session):
     return k_p.keyword, k_p.url, count, clicks
 
 
-def get_all_links(db: Session):
-    urls = db.query(URLST.keyword, URLST.url).all()
+def get_all_links(db: Session,owner_id:int):
+    urls = db.query(URLST.keyword, URLST.url).filter(URLST.owner_id==owner_id).all()
     return [{"keyword": k, "url": u} for k, u in urls]
 
 
@@ -61,8 +61,8 @@ def isexist_to_direct(get_url: str, db: Session):
     return None
 
 
-def delete_link(secret_key: str, db: Session):
-    url = db.query(URLST).filter(URLST.keyword== secret_key).first()
+def delete_link(secret_key: str, db: Session,owner_id:int):
+    url = db.query(URLST).filter(URLST.keyword== secret_key and URLST.owner_id==owner_id).first()
     if not url:
         raise HTTPException(
             status_code=404,

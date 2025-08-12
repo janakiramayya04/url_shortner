@@ -13,21 +13,6 @@ from datetime import datetime
 from .database import Base
 from sqlalchemy.orm import relationship
 
-
-class Users(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    username=Column(String(100),nullable=False)
-    email = Column(String(20), nullable=False)
-    password = Column(String(100), nullable=False)
-    status = Column(Boolean, server_default="0", nullable=False)
-    isverified = Column(Boolean, server_default="0", nullable=False)
-    created_at = Column(
-        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
-    )
-
-
-
 # URLST model
 class URLST(Base):
     __tablename__ = "url_shortner"
@@ -40,8 +25,22 @@ class URLST(Base):
         ForeignKey("users.id"),
         nullable=False,
     )
+    owner = relationship("Users")
     statuses = relationship(
         "Status", back_populates="url_entry", cascade="all, delete-orphan"
+    )
+
+
+class Users(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username=Column(String(100),nullable=False)
+    email = Column(String(20), nullable=False)
+    password = Column(String(100), nullable=False)
+    status = Column(Boolean, server_default="1", nullable=False)
+    isverified = Column(Boolean, server_default="0", nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
 
 

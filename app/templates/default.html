@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All-in-One Service</title>
+    <style>
+      /* --- Basic Styling --- */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        margin: 0;
+        padding: 2rem;
+      }
+
+      .main-container {
+        background: white;
+        padding: 2rem 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 800px;
+      }
+
+      /* --- Tab Navigation --- */
+       .nav-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #eee;
+        margin-bottom: 2rem;
+      }
+
+      .tabs {
+        display: flex;
+      }
+
+      .tab-link {
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #666;
+        border-bottom: 2px solid transparent;
+        transition: color 0.2s, border-bottom-color 0.2s;
+      }
+
+      .tab-link:hover {
+        color: #007bff;
+      }
+
+      .tab-link.active {
+        color: #007bff;
+        border-bottom-color: #007bff;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      h1,
+      h2 {
+        color: #333;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      /* --- Form & General Elements --- */
+      .form-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      input[type="url"],
+      input[type="text"],
+      input[type="email"],
+      input[type="password"] {
+        flex-grow: 1;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 8px 0;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #007bff;
+      }
+
+      button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        background-color: #007bff;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        width: auto;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+      
+      #logout-btn {
+        background-color: #dc3545;
+      }
+      #logout-btn:hover {
+        background-color: #c82333;
+      }
+
+
+      /* --- Result & Display Styling --- */
+      #shared-display {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background-color: #e9ecef;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s, visibility 0.3s;
+      }
+
+      #shared-display.visible {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      #short-url,
+      #all-links {
+        color: #0056b3;
+        font-weight: bold;
+        word-wrap: break-word;
+      }
+
+      /* --- Stats Page Specific Styling --- */
+      .stats-card {
+        background-color: #007bff;
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .stats-card h3 { /* Changed from h2 to h3 */
+        color: white;
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .stats-card .click-count {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-top: 0.5rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.8rem;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f8f9fa;
+      }
+
+      .status-message {
+        text-align: center;
+        color: #888;
+        padding: 2rem;
+      }
+
+      /* --- Auth Page Specific Styling --- */
+      .auth-container form, .auth-container #register-prompt {
+        margin-bottom: 25px;
+      }
+
+      .auth-container button {
+        width: 100%;
+        background: #4caf50;
+      }
+      .auth-container #show-register-btn {
+        background: #007bff;
+      }
+
+      .auth-container button:hover {
+        background: #45a049;
+      }
+       .auth-container #show-register-btn:hover {
+        background: #0056b3;
+      }
+
+      .divider {
+        height: 1px;
+        background: #ddd;
+        margin: 20px 0;
+      }
+
+       .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 1rem;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="nav-header">
+            <div class="tabs">
+                <button id="auth-tab-btn" class="tab-link active" onclick="openTab(event, 'Auth')">
+                    Register / Login
+                </button>
+                <button id="shortener-tab-btn" class="tab-link" onclick="openTab(event, 'Shortener')" style="display: none;">
+                    URL Shortener
+                </button>
+                <button id="analytics-tab-btn" class="tab-link" onclick="openTab(event, 'Analytics')" style="display: none;">
+                    Analytics
+                </button>
+            </div>
+            <button id="logout-btn" style="display: none;">Logout</button>
+        </div>
+
+        <div id="Auth" class="tab-content active">
+            <div class="auth-container">
+                <div id="register-section">
+                    <h2>Register</h2>
+                    <div id="register-prompt">
+                        <p>Are you a new user? Click here to create an account.</p>
+                        <button id="show-register-btn" type="button">Register New Account</button>
+                    </div>
+                    <form id="registerForm" style="display: none;">
+                        <input type="text" id="regUsername" placeholder="Username" required />
+                        <input type="email" id="regEmail" placeholder="Email" required />
+                        <input type="password" id="regPassword" placeholder="Password" required />
+                        <button type="submit">Complete Registration</button>
+                        <a class="back-link" id="back-to-login-link">Already have an account? Login</a>
+                    </form>
+                </div>
+                <div class="divider"></div>
+                <div id="login-section">
+                    <h2>Login</h2>
+                    <form id="loginForm">
+                        <input type="text" id="loginUsername" placeholder="Username" required />
+                        <input type="password" id="loginPassword" placeholder="Password" required />
+                        <button type="submit">Login</button>
+                    </form>
+                </div>
+                 <div class="divider"></div>
+                <h2>Verify Email</h2>
+                  <form id="verifyForm">
+                    <input type="email" id="verifyEmail" placeholder="Enter your email" required />
+                    <input type="password" id="verifyPassword" placeholder="Password" required />
+                    <button type="submit">Send Verification Email</button>
+                    <div id="message">
+                      <a id="verify-url" href="#" target="_blank"> </a>
+                    </div>
+                  </form>
+            </div>
+        </div>
+
+        <div id="Shortener" class="tab-content">
+            <h1>URL Shortener 🔗</h1>
+            <div class="form-group">
+                <input type="url" id="url-input" placeholder="Enter a long URL to shorten" required />
+                <button id="shorten-btn">Shorten</button>
+                <button id="all_btn">Links</button>
+            </div>
+            <div class="form-group">
+                <input type="url" id="shared-input" placeholder="Enter keyword to delete / customise" required />
+                <button id="delete-btn">Delete</button>
+                <button id="custom-btn">Customise</button>
+            </div>
+            <div id="shared-display" class="result-box">
+                <a href="#" id="all-links" target="_blank"></a>
+            </div>
+        </div>
+
+        <div id="Analytics" class="tab-content">
+            <h1>Link Analytics 📊</h1>
+            <div class="form-group">
+                <input type="text" id="status-input" placeholder="Enter the keyword to get status" required />
+                <button id="status-btn">Get Status</button>
+            </div>
+            <div id="analytics-result" style="display: none;">
+                <h2>
+                    Analytics for <span id="short-url-placeholder">...</span>
+                </h2>
+                <p class="original-url">
+                    Redirects to: <a href="#" id="long-url-placeholder" target="_blank" rel="noopener noreferrer">...</a>
+                </p>
+                <div class="stats-card">
+                    <h3>Total Clicks</h3>
+                    <p class="click-count" id="total-clicks">0</p>
+                </div>
+                <div class="history-section">
+                    <h3>Click History</h3>
+                    <table id="click-history-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="click-history-body"></tbody>
+                    </table>
+                    <p id="status-message" class="status-message">Enter a keyword to see its stats.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- DOM Elements ---
+    const authTabBtn = document.getElementById("auth-tab-btn");
+    const shortenerTabBtn = document.getElementById("shortener-tab-btn");
+    const analyticsTabBtn = document.getElementById("analytics-tab-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    const loginSection = document.getElementById("login-section");
+    const registerPrompt = document.getElementById("register-prompt");
+    const registerForm = document.getElementById("registerForm");
+    const showRegisterBtn = document.getElementById("show-register-btn");
+    const backToLoginLink = document.getElementById("back-to-login-link");
+
+    // --- Tabbed Navigation ---
+    function openTab(evt, tabName) {
+        let i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        if (evt.currentTarget) {
+            evt.currentTarget.className += " active";
+        }
+    }
+
+    // --- Authentication Logic ---
+    function showLoginView() {
+        loginSection.style.display = 'block';
+        registerPrompt.style.display = 'block';
+        registerForm.style.display = 'none';
+    }
+
+    function showRegisterView() {
+        loginSection.style.display = 'none';
+        registerPrompt.style.display = 'none';
+        registerForm.style.display = 'block';
+    }
+
+    showRegisterBtn.addEventListener('click', showRegisterView);
+    backToLoginLink.addEventListener('click', showLoginView);
+
+    function handleLoginSuccess() {
+        // Hide auth tab and show others
+        authTabBtn.style.display = "none";
+        shortenerTabBtn.style.display = "inline-block";
+        analyticsTabBtn.style.display = "inline-block";
+        logoutBtn.style.display = "inline-block";
+
+        // Programmatically click the shortener tab to switch views
+        shortenerTabBtn.click();
+    }
+
+    function handleLogout() {
+        // Show auth tab and hide others
+        authTabBtn.style.display = "inline-block";
+        shortenerTabBtn.style.display = "none";
+        analyticsTabBtn.style.display = "none";
+        logoutBtn.style.display = "none";
+
+        // Reset forms
+        document.getElementById("loginForm").reset();
+        document.getElementById("registerForm").reset();
+        showLoginView();
+
+        // Switch back to the auth tab
+        authTabBtn.click();
+    }
+
+    logoutBtn.addEventListener("click", handleLogout);
+
+    // --- Auth Script ---
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const res = await fetch("http://127.0.0.1:8000/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username: document.getElementById("regUsername").value,
+                email: document.getElementById("regEmail").value,
+                password: document.getElementById("regPassword").value,
+            }),
+        });
+        const resultText = await res.json();
+        alert(resultText.message);
+        if (res.ok) {
+            // If registration is successful, show the login view
+            showLoginView();
+        }
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append("username", document.getElementById("loginUsername").value);
+        formData.append("password", document.getElementById("loginPassword").value);
+        
+        try {
+            const res = await fetch("http://127.0.0.1:8000/auth/login", {
+                method: "POST",
+                body: formData,
+            });
+
+            const resultText = await res.text();
+            alert("Login Successfully"); // Show success/error message from backend
+
+            if (res.ok) {
+                // Assuming a 2xx status code means successful login
+                handleLoginSuccess();
+            }
+        } catch(error) {
+            console.error("Login failed:", error);
+            alert("Login failed. Please check the connection to the server.");
+        }
+    });
+
+    document.getElementById("verifyForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const res = await fetch("http://127.0.0.1:8000/auth/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: document.getElementById("verifyEmail").value,
+                password: document.getElementById("verifyPassword").value,
+            }),
+        });
+        const data = await res.json();
+        const link = document.getElementById("verify-url");
+        link.href = data;
+        link.textContent = "verification-link";
+    });
+
+
+    // --- URL Shortener Script ---
+    const deleteBtn = document.getElementById("delete-btn");
+    const sharedinput = document.getElementById("shared-input");
+    const alllinksBtn = document.getElementById("all_btn");
+    const shortenBtn = document.getElementById("shorten-btn");
+    const urlInput = document.getElementById("url-input");
+    const sharedDisplay = document.getElementById("shared-display");
+    const customBtn = document.getElementById("custom-btn");
+
+    customBtn.addEventListener("click", async () => {
+        const keyword = sharedinput.value;
+        if (keyword.length !== 6) {
+            alert("Please enter a keyword that is exactly 6 letters long.");
+            return;
+        }
+        const longUrl = prompt("Please enter the URL you want to shorten:");
+        if (!longUrl) {
+            alert("A valid URL is required to create a short link.");
+            return;
+        }
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/custom/${keyword}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ long_url: longUrl }),
+            });
+            if (!response.ok) {
+                const errText = await response.json();
+                throw new Error(errText.detail || "Failed to create custom URL");
+            }
+            const shortUrl = await response.json();
+            sharedDisplay.innerHTML = `<p>Your shortened URL:</p><a href="${shortUrl[0]}" target="_blank">${shortUrl[1]}</a>`;
+            sharedinput.value = "";
+            sharedDisplay.classList.add("visible");
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+            sharedDisplay.classList.remove("visible");
+        }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+        const keyword = sharedinput.value;
+        if (!keyword) return;
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/admin/${keyword}`, {
+                method: "DELETE",
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || "Failed to delete");
+            }
+            const link = await response.json();
+            sharedDisplay.innerHTML = `<p>Successfully deleted link:</p><ul><li><strong>${link.keyword}</strong>: ${link.url}</li></ul>`;
+            sharedinput.value = "";
+            sharedDisplay.classList.add("visible");
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+            sharedDisplay.classList.remove("visible");
+        }
+    });
+
+    alllinksBtn.addEventListener("click", async () => {
+        try {
+            const response = await fetch("http://127.0.0.1:8000/admin/all");
+            if (!response.ok) throw new Error("Failed to fetch links");
+            const links = await response.json();
+            let listHTML = "<p>All Stored Links:</p><ul>";
+            links.forEach((link) => {
+                listHTML += `<li><strong>${link.keyword}</strong>: <a href="${link.url}" target="_blank">${link.url}</a></li>`;
+            });
+            listHTML += "</ul>";
+            sharedDisplay.innerHTML = listHTML;
+            sharedDisplay.classList.add("visible");
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+            sharedDisplay.classList.remove("visible");
+        }
+    });
+
+    shortenBtn.addEventListener("click", async () => {
+        const longUrl = urlInput.value;
+        if (!longUrl) {
+            alert("Please enter a URL.");
+            return;
+        }
+        const apiUrl = "http://127.0.0.1:8000/url";
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ long_url: longUrl }),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Something went wrong");
+            }
+            const data = await response.json();
+            sharedDisplay.innerHTML = `<p>Your shortened URL:</p><a href="${data.short_url}" target="_blank">${data.short_url}</a>`;
+            urlInput.value = "";
+            sharedDisplay.classList.add("visible");
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+            sharedDisplay.classList.remove("visible");
+        }
+    });
+
+    // --- Analytics Script ---
+    const statusBtn = document.getElementById("status-btn");
+    const statusinput = document.getElementById("status-input");
+    const analyticsResultEl = document.getElementById("analytics-result");
+
+    statusBtn.addEventListener("click", async () => {
+        const shortKey = statusinput.value;
+        if (!shortKey) {
+            alert("Please enter a keyword to get its status.");
+            return;
+        }
+
+        const shortUrlPlaceholder = document.getElementById("short-url-placeholder");
+        const longUrlPlaceholder = document.getElementById("long-url-placeholder");
+        const totalClicksEl = document.getElementById("total-clicks");
+        const clickHistoryBody = document.getElementById("click-history-body");
+        const clickHistoryTable = document.getElementById("click-history-table");
+        const statusMessage = document.getElementById("status-message");
+
+        clickHistoryBody.innerHTML = "";
+        analyticsResultEl.style.display = "none";
+        statusMessage.style.display = "block";
+        statusMessage.textContent = "Loading data...";
+        statusMessage.style.color = "#888";
+        clickHistoryTable.style.display = "table";
+
+        try {
+            const apiUrl = `http://127.0.0.1:8000/stats/${shortKey}`;
+            const response = await fetch(apiUrl);
+
+            if (!response.ok) {
+                if (response.status === 404) throw new Error("This short link does not exist.");
+                throw new Error("Could not fetch analytics data.");
+            }
+            const data = await response.json();
+
+            analyticsResultEl.style.display = "block";
+            shortUrlPlaceholder.textContent = data.keyword;
+            longUrlPlaceholder.textContent = data.url;
+            longUrlPlaceholder.href = data.url;
+            totalClicksEl.textContent = data.statuses;
+
+            if (data.clicks && data.clicks.length > 0) {
+                const reversedClicks = data.clicks.slice().reverse();
+                reversedClicks.forEach((click, index) => {
+                    const row = document.createElement("tr");
+                    const timestamp = new Date(click.timestamp);
+                    const formattedDate = timestamp.toLocaleString(undefined, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                    });
+                    row.innerHTML = `<td>${data.clicks.length - index}</td><td>${formattedDate}</td>`;
+                    clickHistoryBody.appendChild(row);
+                });
+                statusMessage.style.display = "none";
+            } else {
+                statusMessage.textContent = "No clicks have been recorded yet.";
+                clickHistoryTable.style.display = "none";
+            }
+        } catch (error) {
+            statusMessage.textContent = `Error: ${error.message}`;
+            statusMessage.style.color = "red";
+            analyticsResultEl.style.display = "block";
+            console.error("Analytics Error:", error);
+        }
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,3 +1,4 @@
+from urllib.parse import uses_netloc
 from jose import JWTError, jwt,ExpiredSignatureError
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status, Depends
@@ -13,7 +14,7 @@ from app import schemas
 
 from app import database
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 load_dotenv(dotenv_path=".env")
 import os
 
@@ -37,7 +38,7 @@ def create_email_token(user: schemas.UserLogin, db: Session):
         SECRET_KEY,
         algorithm=ALGORITHM,
     )
-    verify_link = f"http://localhost:8000/verify-email?token={token}"
+    verify_link = f"http://localhost:8000/auth/verify-email?token={token}"
     # Send email with verify_link here
     return verify_link
 
@@ -90,9 +91,11 @@ def get_curr_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get
         headers={"WWW-Authenticate": "Bearer"},
     )
     token = verify_access_token(token, credentials_exception)
+    print(token)
     try:
         user_id_int = int(token.id)
     except ValueError:
         raise credentials_exception
-    user = db.query(models.User).filter(models.Users.id == user_id_int).first()
+    user = db.query(models.Users).filter(models.Users.id == user_id_int).first()
+    print(user)
     return user

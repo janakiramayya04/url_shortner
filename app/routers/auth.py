@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status, Request, Depends, HTTPException
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -11,6 +12,10 @@ from passlib.context import CryptContext
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+@router.get("/me")
+def get_profile(current_user: models.Users = Depends(oauth.get_curr_user)):
+    return {"username": current_user.username, "email": current_user.email}
 
 
 @router.post(
@@ -62,6 +67,12 @@ def login(
             detail="Invalid Username or Password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if not pwd_context.verify(user_credentials.password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Username or Password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     if user.isverified != True:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Account Not Verified"
@@ -79,4 +90,4 @@ def verification(email: schemas.UserLogin, db: Session = Depends(database.get_db
 @router.get("/verify-email")
 def verify_email(token: str, db: Session = Depends(database.get_db)):
     oauth.verify_email(token, db)
-    return {"message": "verified email "}
+    return HTMLResponse ("<h1>Email verified successfully!</h1>")

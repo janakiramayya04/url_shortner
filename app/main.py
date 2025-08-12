@@ -5,6 +5,7 @@ from . import schemas
 from . import database
 from . import models
 from . import crud
+from . import oauth
 from sqlalchemy.orm import Session
 
 from .routers import user, auth
@@ -29,11 +30,20 @@ app.include_router(auth.router)
 
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("default.html", {"request": request})
+
+
+# @app.get("/verify", response_class=HTMLResponse)
+# def root(request: Request):
+#     return templates.TemplateResponse("auth.html", {"request": request})
 
 
 @app.post("/url")
-def url_post(url: schemas.Urlryic, db: Session = Depends(database.get_db)):
+def url_post(
+    url: schemas.Urlryic,
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth.get_curr_user),
+):
     if url is None:
         raise HTTPException(
             status_code=status.HTTP_204_NO_CONTENT, detail="url is empty"
@@ -43,7 +53,7 @@ def url_post(url: schemas.Urlryic, db: Session = Depends(database.get_db)):
 
     short_url = f"http://127.0.0.1:8000/{short_key}"  # Compose full URL
 
-    db_url = models.URLST(keyword=short_key, url=url.long_url)
+    db_url = models.URLST(keyword=short_key, url=url.long_url, owner_id=current_user.id)
     db.add(db_url)
     db.commit()
 
@@ -62,34 +72,37 @@ def url_key(get_key: str, db: Session = Depends(database.get_db)):
 
 
 @app.get("/admin/all")
-def admin_key(db: Session = Depends(database.get_db)):
-    rls = crud.get_all_links(db)
+def admin_key(db: Session = Depends(database.get_db),current_user: int = Depends(oauth.get_curr_user)):
+    rls = crud.get_all_links(db,current_user)
     return rls
 
 
 @app.delete("/admin/{secrect_key}")
-def admin_delete(secrect_key: str, db: Session = Depends(database.get_db)):
-    delkey, delurl = crud.delete_link(secrect_key, db)
+def admin_delete(secrect_key: str, db: Session = Depends(database.get_db),current_user: int = Depends(oauth.get_curr_user)):
+    delkey, delurl = crud.delete_link(secrect_key, db,current_user)
     return {"keyword": delkey, "url": delurl}
 
 
 @app.get("/stats/{secret_key}")
-def status_checker(secret_key: str, db: Session = Depends(database.get_db)):
-    keyword, url, count, clicks = crud.get_status(secret_key, db)
+def status_checker(secret_key: str, db: Session = Depends(database.get_db),current_user: int = Depends(oauth.get_curr_user)):
+    keyword, url, count, clicks = crud.get_status(secret_key, db,current_user)
     return {"keyword": keyword, "url": url, "statuses": count, "clicks": clicks}
 
 
-@app.get("/analytics/{keyword}")
-def render_analytics_page(request: Request, keyword: str):
-    return templates.TemplateResponse("stats.html", {"request": request})
+# @app.get("/analytics/{keyword}")
+# def render_analytics_page(request: Request, keyword: str):
+#     return templates.TemplateResponse("stats.html", {"request": request})
 
 
 @app.post("/custom/{keyword}")
 def custom_key(
-    keyword: str, url_data: schemas.URLBase, db: Session = Depends(database.get_db)
+    keyword: str,
+    url_data: schemas.URLBase,
+    db: Session = Depends(database.get_db),
+    current_user: int = Depends(oauth.get_curr_user),
 ):
     created_url_entry = crud.custom_keyword_create(
-        keyword=keyword, db=db, url=str(url_data.long_url)
+        keyword=keyword, db=db, url=str(url_data.long_url), owner_id=current_user
     )
     print(created_url_entry.url, created_url_entry.keyword)
     return {created_url_entry.keyword, created_url_entry.url}
