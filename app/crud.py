@@ -23,14 +23,14 @@ def status_click(db: Session, url_entry: URLST):
 #         raise HTTPException(status_code=404, detail="URL not found")
 #     return len(url_entry.statuses)
 
-def custom_keyword_create(keyword: str, db: Session, url: str):
+def custom_keyword_create(keyword: str, db: Session, url: str, owner_id:int):
     if len(keyword) != 6:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The custom keyword must be exactly 6 characters long."
         )
    
-    db_url = URLST(keyword=keyword, url=url)
+    db_url = URLST(keyword=keyword, url=url,owner_id=owner_id)
     db.add(db_url)
     db.commit()
     db.refresh(db_url)
@@ -38,7 +38,7 @@ def custom_keyword_create(keyword: str, db: Session, url: str):
     return db_url
 
 
-def get_status(keyword: str, db: Session,owner_id:int):
+def get_status(keyword: str, db: Session,owner_id):
     k_p = db.query(URLST).filter(URLST.keyword == keyword).first()
     if not k_p:
         raise HTTPException(status_code=404, detail="Keyword not found")

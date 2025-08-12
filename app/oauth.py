@@ -12,8 +12,6 @@ from app import models
 
 from app import schemas
 
-from app import database
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 load_dotenv(dotenv_path=".env")
 import os
@@ -39,7 +37,6 @@ def create_email_token(user: schemas.UserLogin, db: Session):
         algorithm=ALGORITHM,
     )
     verify_link = f"http://localhost:8000/auth/verify-email?token={token}"
-    # Send email with verify_link here
     return verify_link
 
 

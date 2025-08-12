@@ -51,7 +51,7 @@ def url_post(
 
     short_key = crud.hash_url_short(url.long_url, db)
 
-    short_url = f"http://127.0.0.1:8000/{short_key}"  # Compose full URL
+    short_url = f"http://127.0.0.1:8000/{short_key}" 
 
     db_url = models.URLST(keyword=short_key, url=url.long_url, owner_id=current_user.id)
     db.add(db_url)
@@ -67,25 +67,25 @@ def url_key(get_key: str, db: Session = Depends(database.get_db)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Keyword not found"
         )
-    crud.status_click(db=db, url_entry=original_url)
+    crud.status_click(url_entry=original_url,db=db)
     return RedirectResponse(url=original_url.url)
 
 
 @app.get("/admin/all")
 def admin_key(db: Session = Depends(database.get_db),current_user: int = Depends(oauth.get_curr_user)):
-    rls = crud.get_all_links(db,current_user)
+    rls = crud.get_all_links(db,current_user.id)
     return rls
 
 
 @app.delete("/admin/{secrect_key}")
 def admin_delete(secrect_key: str, db: Session = Depends(database.get_db),current_user: int = Depends(oauth.get_curr_user)):
-    delkey, delurl = crud.delete_link(secrect_key, db,current_user)
+    delkey, delurl = crud.delete_link(secrect_key, db,current_user.id)
     return {"keyword": delkey, "url": delurl}
 
 
 @app.get("/stats/{secret_key}")
 def status_checker(secret_key: str, db: Session = Depends(database.get_db),current_user: int = Depends(oauth.get_curr_user)):
-    keyword, url, count, clicks = crud.get_status(secret_key, db,current_user)
+    keyword, url, count, clicks = crud.get_status(secret_key, db,current_user.id)
     return {"keyword": keyword, "url": url, "statuses": count, "clicks": clicks}
 
 
@@ -102,7 +102,7 @@ def custom_key(
     current_user: int = Depends(oauth.get_curr_user),
 ):
     created_url_entry = crud.custom_keyword_create(
-        keyword=keyword, db=db, url=str(url_data.long_url), owner_id=current_user
+        keyword=keyword, db=db, url=str(url_data.long_url), owner_id=current_user.id
     )
     print(created_url_entry.url, created_url_entry.keyword)
     return {created_url_entry.keyword, created_url_entry.url}

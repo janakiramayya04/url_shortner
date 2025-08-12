@@ -90,4 +90,4 @@ def verification(email: schemas.UserLogin, db: Session = Depends(database.get_db
 @router.get("/verify-email")
 def verify_email(token: str, db: Session = Depends(database.get_db)):
     oauth.verify_email(token, db)
-    return HTMLResponse ("<h1>Email verified successfully!</h1>")
+    return {"message":"verification successfull"}
