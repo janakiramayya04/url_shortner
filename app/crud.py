@@ -1,7 +1,11 @@
 import hashlib
 import base64
+from httpx import URL
 from sqlalchemy.orm import Session
-from .models import URLST, Status
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from app import schemas
+from .models import URLST, Status,Users
 from fastapi import HTTPException,status
 
 # crud.py
@@ -15,6 +19,18 @@ def status_click(db: Session, url_entry: URLST):
     db.refresh(new_status)
 
     return new_status
+
+def reset_password(db:Session,email:schemas.forgotPassword,new_password: str):
+    user=db.query(Users).filter(Users.email == email).first()
+    if not user:
+        return None
+    
+    hashed_password = pwd_context.hash(new_password)
+    user.password=hashed_password
+    db.commit()
+    db.refresh(user)
+    
+    return user
 
 
 # def get_click_count(db: Session, keyword: str):
@@ -34,7 +50,7 @@ def custom_keyword_create(keyword: str, db: Session, url: str, owner_id:int):
     db.add(db_url)
     db.commit()
     db.refresh(db_url)
-    print(db_url.keyword,db_url.url)
+    # print(db_url.keyword,db_url.url)
     return db_url
 
 

@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="URL Shortener", description="A simple API to shorten URLs.", version="1.0.0"
 )
+
 origins = ["*"]
 
 app.add_middleware(
@@ -26,7 +27,7 @@ app.add_middleware(
 models.Base.metadata.create_all(bind=database.engine)
 templates = Jinja2Templates(directory="app/templates")
 app.include_router(auth.router)
-
+app.include_router(user.router)
 
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request):
@@ -89,9 +90,9 @@ def status_checker(secret_key: str, db: Session = Depends(database.get_db),curre
     return {"keyword": keyword, "url": url, "statuses": count, "clicks": clicks}
 
 
-# @app.get("/analytics/{keyword}")
-# def render_analytics_page(request: Request, keyword: str):
-#     return templates.TemplateResponse("stats.html", {"request": request})
+@app.get("/analytics/",response_class=HTMLResponse)
+def render_analytics_page(request: Request):
+    return templates.TemplateResponse("forgotpass.html", {"request": request})
 
 
 @app.post("/custom/{keyword}")
@@ -106,3 +107,4 @@ def custom_key(
     )
     print(created_url_entry.url, created_url_entry.keyword)
     return {created_url_entry.keyword, created_url_entry.url}
+

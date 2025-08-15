@@ -1,5 +1,4 @@
-from urllib.parse import uses_netloc
-from jose import JWTError, jwt,ExpiredSignatureError
+from jose import JWTError, jwt, ExpiredSignatureError
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status, Depends
 from sqlalchemy.orm import Session
@@ -21,17 +20,23 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
+def create_verification_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
 def create_email_token(user: schemas.UserLogin, db: Session):
-    user_in_db = db.query(models.Users).filter(models.Users.email== user.email).first()
-    print(user_in_db, user.email)
+    user_in_db = db.query(models.Users).filter(models.Users.email == user.email).first()
+    # print(user_in_db, user.email)
     if not user_in_db:
         raise HTTPException(status_code=404, detail="User not found")
     token = jwt.encode(
         {
             "sub": user.email,
             "type": "email_verification",
-            "exp": datetime.now(timezone.utc)
-            + timedelta(minutes=5),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
         },
         SECRET_KEY,
         algorithm=ALGORITHM,
@@ -40,12 +45,29 @@ def create_email_token(user: schemas.UserLogin, db: Session):
     return verify_link
 
 
+# def create_email_forgot(user: schemas.forgotPassword, db: Session):
+#     user_in_db = db.query(models.Users).filter(models.Users.email == user["sub"]).first()
+#     # print(user_in_db, user.email)
+#     if not user_in_db:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     token = jwt.encode(
+#         {
+#             "sub": user["sub"],
+#             "type": "email_verification",
+#             "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+#         },
+#         SECRET_KEY,
+#         algorithm=ALGORITHM,
+#     )
+#     verify_link = f"{token}"
+#     return verify_link
+
 def verify_email(token: str, db: Session):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
         user = db.query(models.Users).filter(models.Users.email == email).first()
-        print(user)
+        # print(user)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         user.isverified = True
@@ -55,6 +77,26 @@ def verify_email(token: str, db: Session):
         raise HTTPException(status_code=400, detail="Token expired")
     except JWTError:
         raise HTTPException(status_code=400, detail="Invalid token")
+
+def verify_email_forgot(token: str, db: Session):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        if email is None:
+            # This handles the case where the 'sub' claim is missing.
+            raise HTTPException(status_code=400, detail="Invalid token payload")
+        print(email)
+        user = db.query(models.Users).filter(models.Users.email == email).first()
+        # print(user)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user.email
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Token expired")
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid token")
+
+
 
 
 def create_token(data: dict):
@@ -88,11 +130,11 @@ def get_curr_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get
         headers={"WWW-Authenticate": "Bearer"},
     )
     token = verify_access_token(token, credentials_exception)
-    print(token)
+    # print(token)
     try:
         user_id_int = int(token.id)
     except ValueError:
         raise credentials_exception
     user = db.query(models.Users).filter(models.Users.id == user_id_int).first()
-    print(user)
+    # print(user)
     return user

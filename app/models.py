@@ -35,7 +35,7 @@ class Users(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username=Column(String(100),nullable=False)
-    email = Column(String(20), nullable=False)
+    email = Column(String(100), nullable=False)
     password = Column(String(100), nullable=False)
     status = Column(Boolean, server_default="1", nullable=False)
     isverified = Column(Boolean, server_default="0", nullable=False)

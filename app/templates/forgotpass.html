@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reset Password</title>
+    <style>
+      /* Your CSS styles remain the same... */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      #forgot-container {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+      }
+      h2 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1.75rem;
+        color: #1c1e21;
+      }
+      p {
+        margin-bottom: 1.5rem;
+        color: #606770;
+      }
+      input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid #dddfe2;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
+      input[type="password"]:focus {
+        outline: none;
+        border-color: #1877f2;
+        box-shadow: 0 0 0 2px #e7f3ff;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        background-color: #1877f2;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      button:hover {
+        background-color: #166fe5;
+      }
+      .alert {
+        padding: 12px;
+        margin-top: 1rem;
+        border-radius: 6px;
+        display: none;
+      }
+      .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="forgot-container">
+      <h2>Reset Password</h2>
+      <p>Enter and confirm your new password below.</p>
+
+      <form id="forgotform">
+        <input type="hidden" id="token" name="token" value="{{ access_token }}" />
+
+        <input
+          type="password"
+          id="pass"
+          placeholder="Enter your new password"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Confirm new password"
+          id="confirmpass"
+          required
+        />
+        <button type="submit">Reset Password</button>
+      </form>
+      <div id="alertBox" class="alert"></div>
+    </div>
+
+    <script>
+      // CORRECTION: Target the correct form ID "forgotform"
+      document
+        .getElementById("forgotform")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const alertBox = document.getElementById("alertBox");
+          alertBox.style.display = "none";
+
+          // Get values from all necessary fields
+          const password = document.getElementById("pass").value;
+          const confirmPassword = document.getElementById("confirmpass").value;
+          const token = document.getElementById("token").value;
+
+          // Optional: Check if passwords match on the frontend first
+          if (password !== confirmPassword) {
+            alertBox.className = "alert alert-danger";
+            alertBox.textContent = "Passwords do not match!";
+            alertBox.style.display = "block";
+            return;
+          }
+
+          // CORRECTION: Send the token AND password fields matching the backend schema
+          const res = await fetch("/auth/reset", {
+            // Make sure this URL is correct
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              token: token,
+              password: password,
+              confirm_password: confirmPassword,
+            }),
+          });
+
+          if (res.ok) {
+            const result = await res.json();
+            alertBox.className = "alert alert-success";
+            alertBox.textContent = result.message;
+            alertBox.style.display = "block";
+            document.getElementById("forgotform").style.display = "none";
+          } else {
+            const error = await res.json();
+            alertBox.className = "alert alert-danger";
+            alertBox.textContent = error.detail || "An unknown error occurred.";
+            alertBox.style.display = "block";
+          }
+        });
+    </script>
+  </body>
+</html>
