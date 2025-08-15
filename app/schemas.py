@@ -1,5 +1,5 @@
-from typing import Optional
-from pydantic import ConfigDict, HttpUrl, BaseModel, EmailStr
+from typing import Optional,List
+from pydantic import ConfigDict, HttpUrl, BaseModel, EmailStr 
 from datetime import datetime
 
 
@@ -48,3 +48,20 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     id: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
+
+class MailBody(BaseModel):
+    to: List[str]
+    subject: str
+    body: str
+
+class EmailSchema(BaseModel):
+    email: List[EmailStr]
+
+class forgotPassword(BaseModel):
+    email:List[EmailStr]
+
+class resetPassword(BaseModel):
+    token:str
+    password:str
+    confirm_password:str
+    

@@ -36,19 +36,6 @@
         margin-bottom: 2rem;
       }
 
-      /* --- NEW: User Info Display Styling --- */
-      #user-controls {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      #user-info-display {
-        font-size: 0.9rem;
-        color: #333;
-        text-align: right;
-      }
-
       .tabs {
         display: flex;
       }
@@ -278,10 +265,7 @@
             Analytics
           </button>
         </div>
-        <div id="user-controls" style="display: none">
-          <div id="user-info-display"></div>
-          <button id="logout-btn">Logout</button>
-        </div>
+        <button id="logout-btn" style="display: none">Logout</button>
       </div>
 
       <div id="Auth" class="tab-content active">
@@ -462,8 +446,6 @@
       const shortenerTabBtn = document.getElementById("shortener-tab-btn");
       const analyticsTabBtn = document.getElementById("analytics-tab-btn");
       const logoutBtn = document.getElementById("logout-btn");
-      const userControls = document.getElementById("user-controls");
-      const userInfoDisplay = document.getElementById("user-info-display");
 
       const loginSection = document.getElementById("login-section");
       const registerSection = document.getElementById("register-section");
@@ -539,33 +521,23 @@
       bactologinlinkfromforgot.addEventListener("click", showLoginView);
       backToLoginFromVerify.addEventListener("click", showLoginView);
 
-      // MODIFIED: Function to handle successful login UI changes
       function handleLoginSuccess() {
         authTabBtn.style.display = "none";
         shortenerTabBtn.style.display = "inline-block";
         analyticsTabBtn.style.display = "inline-block";
-        userControls.style.display = "flex";
-
-        const username = sessionStorage.getItem("username");
-        // NOTE: The current API does not provide the user's email upon login.
-        // If it did, you could retrieve and display it here as well.
-        if (username) {
-          userInfoDisplay.innerHTML = `Logged in as: <strong>${username}</strong>`;
-        }
-
+        logoutBtn.style.display = "inline-block";
         shortenerTabBtn.click();
       }
 
-      // MODIFIED: Function to handle logout UI changes
       function handleLogout() {
-        // Clear all session data
-        sessionStorage.clear();
+        // Clear the token from session storage
+        sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("tokenType");
 
         authTabBtn.style.display = "inline-block";
         shortenerTabBtn.style.display = "none";
         analyticsTabBtn.style.display = "none";
-        userControls.style.display = "none"; // Hide user info and logout button
-        userInfoDisplay.innerHTML = ""; // Clear user info text
+        logoutBtn.style.display = "none";
 
         document.getElementById("loginForm").reset();
         document.getElementById("registerForm").reset();
@@ -610,6 +582,9 @@
             });
             if (res.ok) {
               const data = await res.json();
+              // Store token in session storage
+              // sessionStorage.setItem("accessToken", data.access_token);
+              // sessionStorage.setItem("tokenType", data.token_type || "Bearer");
               alert("link sent successfully");
             } else {
               const errorMessage = errorData.detail[0]
@@ -630,8 +605,10 @@
         .addEventListener("submit", async function (e) {
           e.preventDefault();
           const formData = new FormData();
-          const username = document.getElementById("loginUsername").value;
-          formData.append("username", username);
+          formData.append(
+            "username",
+            document.getElementById("loginUsername").value
+          );
           formData.append(
             "password",
             document.getElementById("loginPassword").value
@@ -645,11 +622,9 @@
 
             if (res.ok) {
               const data = await res.json();
-              // MODIFIED: Store token and username in session storage
+              // Store token in session storage
               sessionStorage.setItem("accessToken", data.access_token);
               sessionStorage.setItem("tokenType", data.token_type || "Bearer");
-              sessionStorage.setItem("username", username);
-
               alert("Login Successful!");
               handleLoginSuccess();
             } else {
@@ -674,20 +649,27 @@
         .getElementById("verifyForm")
         .addEventListener("submit", async function (e) {
           e.preventDefault();
+
+          // Get the email value from the input field
           const emailInput = document.getElementById("verifyEmail").value;
+
           try {
             const res = await fetch("http://127.0.0.1:8000/jr/send-email", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
+              // 1. Send the email as a list of strings
               body: JSON.stringify({
                 email: [emailInput],
               }),
             });
+
+            // 2. Check if the request was successful (e.g., status 200)
             if (res.ok) {
               const data = await res.json();
-              console.log(data);
+              console.log(data); // Log the success message: {status: 'success', ...}
               alert("Success! An email has been sent to your address.");
             } else {
+              // Handle HTTP errors like 422, 500, etc.
               const errorData = await res.json();
               console.error("API Error:", errorData);
               alert(
@@ -695,6 +677,7 @@
               );
             }
           } catch (error) {
+            // Handle network errors (e.g., server is down)
             console.error("Network Error:", error);
             alert("Failed to connect to the server.");
           }
@@ -938,13 +921,7 @@
           console.error("Analytics Error:", error);
         }
       });
-      
-      // NEW: On page load, check if user is already logged in
-      document.addEventListener("DOMContentLoaded", function () {
-        if (sessionStorage.getItem("accessToken")) {
-          handleLoginSuccess();
-        }
-      });
     </script>
   </body>
 </html>
+
