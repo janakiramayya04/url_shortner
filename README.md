@@ -1,5 +1,6 @@
 # URL Shortener
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/janakiramayya/url-shortner-app)](https://hub.docker.com/r/janakiramayya/url-shortner-app)
 A **FastAPI**-based URL shortener with Docker support.  
 It allows users to shorten URLs with custom keywords, track the number of clicks, and record the timestamp of each click.
 
@@ -58,6 +59,7 @@ GET /status/{keyword}
 
 ## License
  This project is licensed under the MIT License.
+
 
 
 
