@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "mysql+pymysql://root:rootpass@mysql-test:3306/url_shortner"
+    depends_on:
+      mysql-test:
+        condition: service_healthy
+
+  mysql-test:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "rootpass"
+      MYSQL_DATABASE: "url_shortner"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=rootpass"]
+      timeout: 20s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  db_data:
