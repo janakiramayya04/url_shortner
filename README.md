@@ -63,8 +63,13 @@ GET /status/{keyword}
 
 <img width="1468" height="941" alt="image" src="https://github.com/user-attachments/assets/b41e50c5-5290-469c-8fac-9269cceb9273" />
 
+<img width="1363" height="816" alt="image" src="https://github.com/user-attachments/assets/261c2f9b-105d-45c9-a5f3-b49923af5ec5" />
 
+<img width="1225" height="643" alt="image" src="https://github.com/user-attachments/assets/34cffde2-3d27-46bb-b027-5491790fb7f6" />
 
+<img width="1212" height="731" alt="image" src="https://github.com/user-attachments/assets/17349181-1d1f-490d-9eec-720469572a98" />
+
+<img width="1208" height="987" alt="image" src="https://github.com/user-attachments/assets/38cd381f-d6c4-4113-a7e1-3f28c3910922" />
 
 
 
