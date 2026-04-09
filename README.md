@@ -25,11 +25,11 @@ This project provides a scalable backend service to shorten URLs, track usage, a
 
 ```bash
 app/
- ├── main.py
- ├── models/
- ├── schemas/
- ├── database/
- ├── routers/
+ ├── main.py          # Entry point
+ ├── models/          # DB models
+ ├── schemas/         # Pydantic schemas
+ ├── database/        # DB connection
+ ├── routers/         # API routes
  ```
 
 ## 🔄 How It Works
