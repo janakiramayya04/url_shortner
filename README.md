@@ -30,7 +30,8 @@ app/
  ├── schemas/
  ├── database/
  ├── routers/
- 
+ ```
+
 ## 🔄 How It Works
 1. User sends URL to `/shorten`
 2. Server generates a unique keyword
