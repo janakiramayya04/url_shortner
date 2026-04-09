@@ -1,8 +1,12 @@
-# URL Shortener  [![Docker Pulls](https://img.shields.io/docker/pulls/janakiramayya/url-shortner-app)](https://hub.docker.com/r/janakiramayya/url-shortner-app)
+# URL Shortener API with FastAPI, SQLAlchemy & Docker  [![Docker Pulls](https://img.shields.io/docker/pulls/janakiramayya/url-shortner-app)](https://hub.docker.com/r/janakiramayya/url-shortner-app)
 
 
 A **FastAPI**-based URL shortener with Docker support.  
 It allows users to shorten URLs with custom keywords, track the number of clicks, and record the timestamp of each click.
+
+## 📌 Problem Statement
+Long URLs are difficult to share and track.  
+This project provides a scalable backend service to shorten URLs, track usage, and manage links efficiently.
 
 ## Features
 - Shorten any URL
@@ -16,6 +20,21 @@ It allows users to shorten URLs with custom keywords, track the number of clicks
 - **SQLite/MySQL** (Configurable database)
 - **SQLAlchemy** (ORM)
 - **Docker** (Containerization)
+
+## 📁 Project Structure
+app/
+ ├── main.py
+ ├── models/
+ ├── schemas/
+ ├── database/
+ ├── routers/
+ 
+## 🔄 How It Works
+1. User sends URL to `/shorten`
+2. Server generates a unique keyword
+3. URL is stored in database
+4. When accessed, it redirects and updates click stats
+
 
 ## Installation
 
@@ -70,6 +89,12 @@ GET /status/{keyword}
 <img width="1208" height="987" alt="image" src="https://github.com/user-attachments/assets/38cd381f-d6c4-4113-a7e1-3f28c3910922" />
 
 
+## 🚀 Future Improvements
+- JWT-based user authentication
+- URL expiration
+- Analytics dashboard
 
 
+## 📜 License
+This project is licensed under the MIT License.
 
