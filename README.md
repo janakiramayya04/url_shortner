@@ -22,6 +22,8 @@ This project provides a scalable backend service to shorten URLs, track usage, a
 - **Docker** (Containerization)
 
 ## 📁 Project Structure
+
+```bash
 app/
  ├── main.py
  ├── models/
